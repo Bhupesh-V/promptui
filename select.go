@@ -116,24 +116,27 @@ type Key struct {
 // text/template syntax. Custom state, colors and background color are available for use inside
 // the templates and are documented inside the Variable section of the docs.
 //
-// Examples
+// # Examples
 //
 // text/templates use a special notation to display programmable content. Using the double bracket notation,
 // the value can be printed with specific helper functions. For example
 //
 // This displays the value given to the template as pure, unstylized text. Structs are transformed to string
 // with this notation.
-// 	'{{ . }}'
+//
+//	'{{ . }}'
 //
 // This displays the name property of the value colored in cyan
-// 	'{{ .Name | cyan }}'
+//
+//	'{{ .Name | cyan }}'
 //
 // This displays the label property of value colored in red with a cyan background-color
-// 	'{{ .Label | red | cyan }}'
+//
+//	'{{ .Label | red | cyan }}'
 //
 // See the doc of text/template for more info: https://golang.org/pkg/text/template/
 //
-// Notes
+// # Notes
 //
 // Setting any of these templates will remove the icons from the default templates. They must
 // be added back in each of their specific templates. The styles.go constants contains the default icons.
@@ -164,6 +167,9 @@ type SelectTemplates struct {
 	// Help is a text/template for displaying instructions at the top. By default
 	// it shows keys for movement and search.
 	Help string
+
+	// Search Label is the label of search prompt when search mode is active
+	SearchLabel string
 
 	// FuncMap is a map of helper functions that can be used inside of templates according to the text/template
 	// documentation.
@@ -296,7 +302,12 @@ func (s *Select) innerRun(cursorPos, scroll int, top rune) (int, string, error) 
 		}
 
 		if searchMode {
-			header := SearchPrompt + cur.Format()
+			var header string
+			if len(s.Templates.SearchLabel) > 0 {
+				header = s.Templates.SearchLabel + cur.Format()
+			} else {
+				header = SearchPrompt + cur.Format()
+			}
 			sb.WriteString(header)
 		} else if !s.HideHelp {
 			help := s.renderHelp(canSearch)
